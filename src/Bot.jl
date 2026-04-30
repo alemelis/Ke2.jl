@@ -26,7 +26,15 @@ end
 function stream_events(c::LichessClient)
     Channel{Event}(CHANNEL_BUFFER) do ch
         request_stream(c, "/api/stream/event") do line
-            put!(ch, JSON3.read(line, Event))
+            try
+                put!(ch, JSON3.read(line, Event))
+            catch e
+                # Parse failed — emit a bare Event so the caller can at least see the type
+                raw = try JSON3.read(line) catch; nothing end
+                t   = raw !== nothing ? string(get(raw, :type, "unknown")) : "unknown"
+                @warn "stream_events: failed to parse event type=$t line=$(first(line,200))" exception=e
+                try put!(ch, Event(t, nothing, nothing)) catch; end
+            end
         end
     end
 end

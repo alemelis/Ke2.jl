@@ -158,6 +158,7 @@ struct ChallengeInfo
     direction::Union{String, Nothing}
     initialFen::Union{String, Nothing}
     declineReason::Union{String, Nothing}
+    declineReasonKey::Union{String, Nothing}
 end
 StructTypes.StructType(::Type{ChallengeInfo}) = StructTypes.Struct()
 
